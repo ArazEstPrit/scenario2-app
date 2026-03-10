@@ -1,6 +1,3 @@
-import { getReport, setup } from "#core/modules";
-import { inspect } from "util";
+import { setup } from "#core/modules";
 
 await setup();
-
-console.log("module info:", inspect(getReport(), false, null, true));
