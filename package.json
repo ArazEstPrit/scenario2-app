@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "typescript": "^5.9.3"
+  },
+  "imports": {
+    "#*": "./src/*/index.ts"
   }
 }
