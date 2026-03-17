@@ -119,7 +119,7 @@ export interface ListActionResult<T> extends BaseActionResult {
 }
 
 export interface Command<
-	N extends ActionName,
+	N extends ActionName = ActionName,
 	A extends ActionMap[N]["arguments"] = ActionMap[N]["arguments"],
 	U extends ActionMap[N]["returns"] = ActionMap[N]["returns"],
 > {

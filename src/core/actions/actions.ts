@@ -1,55 +1,23 @@
-import type {
-	ActionMap,
-	ActionName,
-	Command,
-	VoidActionResult,
-} from "./types.ts";
+import type { ActionMap, ActionName, Command } from "./types.ts";
 
-export function register<const N extends ActionName>(command: Command<N>) {}
+const commands = {} as Record<string, Command>;
+
+export function register<const N extends ActionName>(command: Command<N>) {
+	commands[command.name] = command;
+}
 
 export function call<const N extends ActionName>(
 	commandName: N,
 	args: ActionMap[N]["arguments"],
-): ActionMap[N]["returns"] {}
-
-declare module "#core/actions" {
-	export interface ActionMap {
-		asd: {
-			arguments: {
-				asd: boolean;
-				asdd: {
-					a: number;
-					b: Date[];
-				};
-			};
-			returns: VoidActionResult;
-		};
-	}
+): ActionMap[N]["returns"] {
+	const command = commands[commandName] as Command<N>;
+	return command.execute(args);
 }
-
-register({
-	name: "asd",
-	arguments: {
-		asd: { type: "boolean" },
-		asdd: {
-			type: "object",
-			fields: {
-				a: { type: "number" },
-				b: { type: "array", itemType: "date" },
-			},
-		},
-	},
-	execute(params) {
-		params.asdd.b;
-		return { type: "void", success: true };
-	},
-});
 
 register({
 	name: "actions:help",
 	arguments: {},
-	execute(params) {
-		params;
+	execute() {
 		return { type: "item", success: true, item: "" };
 	},
 });
