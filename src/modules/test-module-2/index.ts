@@ -10,9 +10,7 @@ export async function init() {
 	// why we enable sticky mode on this listener.
 	// listen("test-module:test1", handleEvent, { sticky: true });
 
-	const result = await callAsync("test-module:action1", {
-		a: { b: -123, c: 43 },
-	});
+	const result = await callAsync("test-module:action1", {});
 	console.log("Result:", result);
 }
 

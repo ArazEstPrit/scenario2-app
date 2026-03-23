@@ -1,4 +1,5 @@
-import { type ItemActionResult, register } from "#core/actions";
+import { register, type VoidActionResult } from "#core/actions";
+import { getStore, updateStore } from "#core/storage";
 // import { emit } from "#core/events";
 
 declare module "#core/events" {
@@ -10,14 +11,15 @@ declare module "#core/events" {
 declare module "#core/actions" {
 	interface ActionMap {
 		"test-module:action1": {
-			arguments: {
-				a: {
-					b: number;
-					c: number;
-				};
-			};
-			returns: ItemActionResult<Promise<{ sum: number }>>;
+			arguments: {};
+			returns: VoidActionResult;
 		};
+	}
+}
+
+declare module "#core/storage" {
+	interface StoreMap {
+		"test-module:test": { item: number }[];
 	}
 }
 
@@ -28,26 +30,13 @@ export function init() {
 
 	register({
 		name: "test-module:action1",
-		arguments: {
-			a: {
-				type: "object",
-				fields: {
-					b: {
-						type: "number",
-						validate: val =>
-							val < 0 ? "Number must be positive" : true,
-					},
-					c: { type: "number" },
-				},
-			},
-		},
-		returnType: "item",
-		async execute(params) {
-			console.log("Action Ran!");
-
-			return {
-				sum: params.a.b + params.a.c,
-			};
+		arguments: {},
+		returnType: "void",
+		execute() {
+			const store = getStore("test-module:test", []);
+			store.data.push({ item: (store.data.at(-1)?.item || 0) + 1 });
+			console.log(store);
+			updateStore(store);
 		},
 	});
 }

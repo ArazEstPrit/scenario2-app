@@ -139,7 +139,7 @@ interface BaseActionResult {
 
 export interface VoidActionResult extends BaseActionResult {
 	type: "void";
-	data: null;
+	data: void;
 }
 
 export interface ItemActionResult<T> extends BaseActionResult {
