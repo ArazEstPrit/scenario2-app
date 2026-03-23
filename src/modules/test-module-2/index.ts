@@ -10,7 +10,7 @@ export function init() {
 	// why we enable sticky mode on this listener.
 	// listen("test-module:test1", handleEvent, { sticky: true });
 
-	const result = call("test-module:action1", { a: 123, b: 123 });
+	const result = call("test-module:action1", { a: { b: 123, c: 43 } });
 	console.log("Result:", result);
 }
 

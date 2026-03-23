@@ -6,11 +6,11 @@
  * declare module "#core/actions" {
  * 	interface ActionMap {
  * 		"my-module:my-action": {
- * 			parameters: {};
+ * 			arguments: {};
  * 			returns: VoidActionResult;
  * 		};
  * 		"my-module:my-other-action": {
- * 			parameters: {
+ * 			arguments: {
  * 				a: number;
  * 				b: string;
  * 			};
@@ -34,6 +34,21 @@ export interface ActionMap {
 
 export type ActionName = keyof ActionMap;
 
+export interface Action<
+	N extends ActionName,
+	AD extends InferArgsDefinition<A>,
+	A extends ActionMap[N]["arguments"] = ActionMap[N]["arguments"],
+	U extends ActionMap[N]["returns"] = ActionMap[N]["returns"],
+> {
+	name: N;
+	displayName?: string;
+	aliases?: string[];
+	description?: string;
+	arguments: AD;
+	returnType: U["type"];
+	execute(params: A): U extends ActionResult<infer T> ? T : never;
+}
+
 export interface ArgumentTypeMap {
 	string: string;
 	number: number;
@@ -51,82 +66,78 @@ export type ArgumentType = keyof ArgumentTypeMap;
 
 export type Arguments = Record<string, Argument>;
 
-type Argument<T extends ArgumentType = ArgumentType> = T extends "object"
+export type Argument<
+	T extends ArgumentType = ArgumentType,
+	O extends boolean = boolean,
+> = T extends "object"
 	? ObjectArgument
 	: T extends "array"
 		? ArrayArgument
-		: BaseArgument<T>;
+		: BaseArgument<T, O>;
 
-interface BaseArgument<T extends ArgumentType> {
+interface BaseArgument<T extends ArgumentType, O extends boolean> {
 	displayName?: string;
 	description?: string;
 	type: T;
-	required?: boolean;
+	optional?: O;
 	default?: ArgumentTypeMap[T];
-	// TODO: boolean vs throw
-	validate?: (value: ArgumentTypeMap[T]) => void;
+	validate?: (value: ArgumentTypeMap[T]) => boolean | string;
 }
 
 interface ArrayArgument<
 	A extends ArgumentType = ArgumentType,
-> extends BaseArgument<"array"> {
+	O extends boolean = boolean,
+> extends BaseArgument<"array", O> {
 	itemType: A;
 }
 
 interface ObjectArgument<
 	A extends Arguments = Arguments,
-> extends BaseArgument<"object"> {
+	O extends boolean = boolean,
+> extends BaseArgument<"object", O> {
 	fields: A;
 }
+// Copied from: https://zirkelc.dev/posts/typescript-how-to-check-for-optional-properties
+type IsOptional<T, K extends keyof T> = undefined extends T[K]
+	? {} extends Pick<T, K>
+		? true
+		: false
+	: false;
 
-type InferArgsDefinition<A> =
-	// Special case for if there are no args.
-	A extends Record<string, never>
-		? A
-		: {
-				[K in keyof A]: InferArgDefinition<A[K]>;
-			};
+export type InferArgsDefinition<A> = {
+	[K in keyof A]-?: InferArgDefinition<A[K], IsOptional<A, K>>;
+};
 
 type InferArgDefinition<
 	A,
+	O extends boolean,
 	N extends ArgumentName<A> = ArgumentName<A>,
 > = N extends "object"
-	? ObjectArgument<InferArgsDefinition<A>>
+	? ObjectArgument<InferArgsDefinition<A>, O>
 	: N extends "array"
-		? // Holy shit how bad is this code
-			ArrayArgument<ArgumentName<A extends Array<infer K> ? K : never>>
-		: Argument<N>;
+		? ArrayArgument<ArgumentName<A extends Array<infer K> ? K : never>, O>
+		: Argument<N, O>;
 
 export type ActionResult<T = unknown> = VoidActionResult | ItemActionResult<T>;
 
 interface BaseActionResult {
 	type: string;
 	success: boolean;
+	error?: unknown;
+	data: unknown;
 }
 
 export interface VoidActionResult extends BaseActionResult {
 	type: "void";
+	data: null;
 }
 
 export interface ItemActionResult<T> extends BaseActionResult {
 	type: "item";
-	item: T;
+	data: T;
 }
 
 export interface ListActionResult<T> extends BaseActionResult {
 	type: "list";
-	list: T[];
-}
-
-export interface Command<
-	N extends ActionName = ActionName,
-	A extends ActionMap[N]["arguments"] = ActionMap[N]["arguments"],
-	U extends ActionMap[N]["returns"] = ActionMap[N]["returns"],
-> {
-	name: N;
-	displayName?: string;
-	aliases?: string[];
-	description?: string;
-	arguments: InferArgsDefinition<A>;
-	execute(params: A): U;
+	data: T[];
 }

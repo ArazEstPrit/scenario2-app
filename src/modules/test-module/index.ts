@@ -11,8 +11,10 @@ declare module "#core/actions" {
 	interface ActionMap {
 		"test-module:action1": {
 			arguments: {
-				a: number;
-				b: number;
+				a: {
+					b: number;
+					c: number;
+				};
 			};
 			returns: ItemActionResult<{ sum: number }>;
 		};
@@ -27,18 +29,20 @@ export function init() {
 	register({
 		name: "test-module:action1",
 		arguments: {
-			a: { type: "number", displayName: "First number" },
-			b: { type: "number", displayName: "Second number" },
+			a: {
+				type: "object",
+				fields: {
+					b: { type: "number" },
+					c: { type: "number" },
+				},
+			},
 		},
+		returnType: "item",
 		execute(params) {
 			console.log("Action Ran!");
 
 			return {
-				type: "item",
-				item: {
-					sum: params.a + params.b,
-				},
-				success: true,
+				sum: params.a.b + params.a.c,
 			};
 		},
 	});
