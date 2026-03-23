@@ -75,7 +75,9 @@ function parseArgs(
 	return args;
 }
 
-export function resolveAlias(alias: string) {}
+export function resolveAlias(alias: string) {
+	return aliasMap.get(alias);
+}
 
 register({
 	name: "actions:help",
