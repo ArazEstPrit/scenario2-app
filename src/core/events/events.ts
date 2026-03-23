@@ -449,15 +449,6 @@ export function getListenerMetrics(id: string): ListenerMetrics {
 	};
 }
 
-export function __resetState(): void {
-	if (!__test?.active) throw new Error("Not in a testing environment!");
-
-	listenerMap.clear();
-	inactiveListenerMap.clear();
-	eventMap.clear();
-	wildcardIndex.clear();
-}
-
 function isWildcard(key: EventKey): key is EventWildcard {
 	return key.endsWith("*");
 }
