@@ -84,6 +84,7 @@ export type Argument<
 interface BaseArgument<T extends ArgumentType, O extends boolean> {
 	displayName?: string;
 	description?: string;
+	aliases?: string[];
 	type: T;
 	optional?: O;
 	default?: ArgumentTypeMap[T];

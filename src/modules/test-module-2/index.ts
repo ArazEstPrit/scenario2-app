@@ -1,6 +1,7 @@
 // import { type EventEmission, listen } from "#core/events";
 
 import { callAsync } from "#core/actions";
+import { inspect } from "util";
 
 export async function init() {
 	console.log("test-module-2 ran!");
@@ -10,8 +11,10 @@ export async function init() {
 	// why we enable sticky mode on this listener.
 	// listen("test-module:test1", handleEvent, { sticky: true });
 
-	const result = await callAsync("test-module:action1", {});
-	console.log("Result:", result);
+	console.log(
+		"Result:",
+		inspect(await callAsync("test-module:action1", {}), false, null, true),
+	);
 }
 
 // function handleEvent(emission: EventEmission<"test-module:test1">) {
