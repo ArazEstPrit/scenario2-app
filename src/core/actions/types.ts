@@ -45,9 +45,15 @@ export interface Action<
 	aliases?: string[];
 	description?: string;
 	arguments: AD;
-	returnType: U["type"];
-	execute(params: A): U extends ActionResult<infer T> ? T : never;
+	returnType: Awaited<U>["type"];
+	execute(
+		params: A,
+	): U extends Promise<infer T>
+		? Promise<inferResultData<T>>
+		: inferResultData<U>;
 }
+
+type inferResultData<T> = T extends ActionResult<infer T> ? T : never;
 
 export interface ArgumentTypeMap {
 	string: string;
@@ -97,6 +103,7 @@ interface ObjectArgument<
 > extends BaseArgument<"object", O> {
 	fields: A;
 }
+
 // Copied from: https://zirkelc.dev/posts/typescript-how-to-check-for-optional-properties
 type IsOptional<T, K extends keyof T> = undefined extends T[K]
 	? {} extends Pick<T, K>
@@ -119,6 +126,9 @@ type InferArgDefinition<
 		: Argument<N, O>;
 
 export type ActionResult<T = unknown> = VoidActionResult | ItemActionResult<T>;
+
+export type AwaitedActionResult<T extends ActionResult> =
+	T extends ActionResult<infer T> ? ActionResult<Awaited<T>> : never;
 
 interface BaseActionResult {
 	type: string;

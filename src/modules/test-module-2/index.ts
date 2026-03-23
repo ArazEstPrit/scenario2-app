@@ -1,8 +1,8 @@
 // import { type EventEmission, listen } from "#core/events";
 
-import { call } from "#core/actions";
+import { callAsync } from "#core/actions";
 
-export function init() {
+export async function init() {
 	console.log("test-module-2 ran!");
 
 	// this module is loaded after test-module is loaded, so this module only
@@ -10,7 +10,9 @@ export function init() {
 	// why we enable sticky mode on this listener.
 	// listen("test-module:test1", handleEvent, { sticky: true });
 
-	const result = call("test-module:action1", { a: { b: 123, c: 43 } });
+	const result = await callAsync("test-module:action1", {
+		a: { b: -123, c: 43 },
+	});
 	console.log("Result:", result);
 }
 

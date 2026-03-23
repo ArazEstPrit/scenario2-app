@@ -1,9 +1,16 @@
+import {
+	ActionError,
+	InvalidArgumentError,
+	RequiredArgumentMissingError,
+} from "./errors.ts";
 import type {
 	ActionMap,
 	ActionName,
+	ActionResult,
 	Action,
 	Arguments,
 	InferArgsDefinition,
+	AwaitedActionResult,
 } from "./types.ts";
 
 const actionMap = new Map<string, Action<ActionName, Arguments>>();
@@ -31,38 +38,61 @@ export function call<const N extends ActionName>(
 	const result = {
 		type: action.returnType,
 		success: true,
-	} as ActionMap[N]["returns"];
-
-	const args = parseArgs(action.arguments, rawArgs) as Parameters<
-		(typeof action)["execute"]
-	>[0];
+	} as Awaited<ActionMap[N]["returns"]>;
 
 	try {
+		const args = parseArgs(
+			action.arguments,
+			rawArgs,
+			actionName,
+		) as ActionMap[N]["arguments"];
+
 		result.data = action.execute(args);
 	} catch (error) {
 		result.success = false;
-		result.error = error;
+		result.error = new ActionError(
+			`Action ${actionName} threw during execution.`,
+			actionName,
+			error,
+		);
 	}
 
 	return result;
 }
 
+export async function callAsync<
+	const N extends ActionName,
+	R extends ActionResult = ActionMap[N]["returns"],
+>(
+	actionName: N,
+	rawArgs: ActionMap[N]["arguments"],
+): Promise<AwaitedActionResult<R>> {
+	const result = call(actionName, rawArgs);
+	await result.data;
+	return result as AwaitedActionResult<R>;
+}
+
 function parseArgs(
 	argDef: Arguments,
 	args: Record<string, unknown>,
+	action: string,
+	parentArg?: string,
 ): Record<string, unknown> {
 	for (const arg of Object.keys(argDef)) {
 		const def = argDef[arg]!;
+		const fullArgName = parentArg ? `${parentArg}.${arg}` : arg;
 		if (!args[arg])
-			if (!def.optional) throw "RequiredParameterMissingError";
+			if (!def.optional)
+				throw new RequiredArgumentMissingError(action, fullArgName);
 			else args[arg] = def.default;
 
 		if (def.validate) {
 			const result = def.validate(args[arg] as never); // as never because typescript is dumb
 			if (result !== true)
-				throw (
-					"Invalid parameter: " +
-					(typeof result == "string" ? result : "")
+				throw new InvalidArgumentError(
+					action,
+					fullArgName,
+					typeof result == "string" ? result : "",
 				);
 		}
 
@@ -70,6 +100,8 @@ function parseArgs(
 			args[arg] = parseArgs(
 				def.fields,
 				args[arg] as Record<string, unknown>,
+				action,
+				fullArgName,
 			);
 	}
 	return args;
@@ -87,6 +119,3 @@ register({
 		return "";
 	},
 });
-
-// TODO:
-// - async actions - ActionTimeoutError

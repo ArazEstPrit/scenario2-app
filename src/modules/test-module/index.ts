@@ -16,7 +16,7 @@ declare module "#core/actions" {
 					c: number;
 				};
 			};
-			returns: ItemActionResult<{ sum: number }>;
+			returns: ItemActionResult<Promise<{ sum: number }>>;
 		};
 	}
 }
@@ -32,13 +32,17 @@ export function init() {
 			a: {
 				type: "object",
 				fields: {
-					b: { type: "number" },
+					b: {
+						type: "number",
+						validate: val =>
+							val < 0 ? "Number must be positive" : true,
+					},
 					c: { type: "number" },
 				},
 			},
 		},
 		returnType: "item",
-		execute(params) {
+		async execute(params) {
 			console.log("Action Ran!");
 
 			return {
