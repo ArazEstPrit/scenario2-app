@@ -3,3 +3,4 @@ uml/
 *.log
 node_modules/
 dist/
+data/
