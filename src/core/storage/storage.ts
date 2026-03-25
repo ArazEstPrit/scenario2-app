@@ -12,7 +12,9 @@ export function getStore<N extends StoreName>(
 	if (existsSync(path))
 		return {
 			name,
-			data: JSON.parse(readFileSync(path, "utf-8")) as StoreMap[N],
+			data: JSON.parse(readFileSync(path, "utf-8"), (key, value) =>
+				key.toLowerCase().includes("date") ? new Date(value) : value,
+			) as StoreMap[N],
 		};
 	else {
 		return updateStore({ name, data: defaultData! });

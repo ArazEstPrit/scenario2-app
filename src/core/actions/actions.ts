@@ -92,8 +92,7 @@ function parseArgs(
 			if (!def.optional)
 				throw new RequiredArgumentMissingError(action, fullArgName);
 			else args[arg] = def.default;
-
-		if (def.validate) {
+		else if (def.validate) {
 			const result = def.validate(args[arg] as never); // as never because typescript is dumb
 			if (result !== true)
 				throw new InvalidArgumentError(
