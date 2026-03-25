@@ -34,7 +34,13 @@ export interface ActionMap {
 
 export type ActionName = keyof ActionMap;
 
-export interface Action<
+export type Action<
+	N extends ActionName = ActionName,
+	AD extends InferArgsDefinition<ActionMap[N]["arguments"]> =
+		InferArgsDefinition<ActionMap[N]["arguments"]>,
+> = BaseAction<N, AD>;
+
+interface BaseAction<
 	N extends ActionName,
 	AD extends InferArgsDefinition<A>,
 	A extends ActionMap[N]["arguments"] = ActionMap[N]["arguments"],
@@ -126,7 +132,10 @@ type InferArgDefinition<
 		? ArrayArgument<ArgumentName<A extends Array<infer K> ? K : never>, O>
 		: Argument<N, O>;
 
-export type ActionResult<T = unknown> = VoidActionResult | ItemActionResult<T>;
+export type ActionResult<T = unknown> =
+	| VoidActionResult
+	| ItemActionResult<T>
+	| ListActionResult<T>;
 
 export type AwaitedActionResult<T extends ActionResult> =
 	T extends ActionResult<infer T> ? ActionResult<Awaited<T>> : never;

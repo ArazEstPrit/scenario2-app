@@ -1,3 +1,4 @@
+import { registerCommand } from "#core/ui/cli";
 import {
 	ActionError,
 	InvalidArgumentError,
@@ -13,8 +14,15 @@ import type {
 	AwaitedActionResult,
 } from "./types.ts";
 
-const actionMap = new Map<string, Action<ActionName, Arguments>>();
-const aliasMap = new Map<string, string>();
+const actionMap = new Map<string, Action>();
+const aliasMap = new Map<string, ActionName>();
+
+export function getAction(name: ActionName | string): Action | undefined {
+	const resolved = resolveAlias(name);
+	return (
+		actionMap.get(name) || (resolved ? actionMap.get(resolved) : undefined)
+	);
+}
 
 export function register<const N extends ActionName>(
 	action: Action<N, InferArgsDefinition<ActionMap[N]["arguments"]>>,
@@ -107,15 +115,21 @@ function parseArgs(
 	return args;
 }
 
-export function resolveAlias(alias: string) {
+export function resolveAlias(alias: string): ActionName | undefined {
 	return aliasMap.get(alias);
 }
 
 register({
 	name: "actions:help",
+	aliases: ["h"],
 	arguments: {},
 	returnType: "item",
 	execute() {
-		return "";
+		return actionMap
+			.values()
+			.map(a => `${a.name} - ${a.aliases?.join("|")}`)
+			.toArray()
+			.join("\n");
 	},
 });
+registerCommand("actions:help");
