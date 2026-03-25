@@ -1,29 +1,19 @@
 import {
-	type Action,
-	type ActionName,
 	type ActionResult,
 	type Arguments,
-	callAsync,
-	getAction,
 	type ItemActionResult,
 	type ListActionResult,
+	type Argument,
+	callAsync,
+	getAction,
 } from "#core/actions";
 import type { RawParsedCommandArguments } from "./types.ts";
 import { CommandError } from "./errors.ts";
 
-const commands = new Map<string, Action>();
-
-export function registerCommand<N extends ActionName>(name: N) {
-	const action = getAction(name);
-	if (!action) return;
-	commands.set(name, action);
-	action.aliases?.forEach(a => commands.set(a, action));
-}
-
 export async function run(args: string[]) {
 	const { commandName, params } = parseArgs(args);
 	if (!commandName) throw new CommandError("No command provided!");
-	const action = commands.get(commandName);
+	const action = getAction(commandName);
 	if (!action) throw new CommandError("Command not found! " + commandName);
 	const resolvedParams = resolveParams(params, action.arguments);
 	const result = await callAsync(action.name, resolvedParams);
@@ -69,10 +59,37 @@ function resolveParams(
 	const resolvedParams = {} as Record<string, unknown>;
 
 	for (const arg of Object.keys(argDef)) {
-		resolvedParams[arg] = params[arg];
+		resolvedParams[arg] = resolveParamType(
+			[arg]
+				.concat(argDef[arg]?.aliases || [])
+				.map(key => params[key])
+				.find(val => val !== undefined),
+			argDef[arg]!,
+		);
 	}
 
 	return resolvedParams;
+}
+
+function resolveParamType(param: string | undefined, def: Argument) {
+	if (param === undefined) return undefined;
+
+	switch (def.type) {
+		case "string":
+			return param;
+		case "number":
+			const num = parseFloat(param);
+			return isNaN(num) ? undefined : num;
+		case "boolean":
+			return ["false", "f"].includes(param.toLowerCase()) ? false : true;
+		case "date":
+			const date = new Date(param);
+			return isNaN(date.getTime()) ? undefined : date;
+		case "array":
+			return param.split(",");
+		default:
+			return undefined;
+	}
 }
 
 function displayResult(result: ActionResult) {

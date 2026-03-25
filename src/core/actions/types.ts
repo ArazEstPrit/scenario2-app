@@ -81,11 +81,7 @@ export type Arguments = Record<string, Argument>;
 export type Argument<
 	T extends ArgumentType = ArgumentType,
 	O extends boolean = boolean,
-> = T extends "object"
-	? ObjectArgument
-	: T extends "array"
-		? ArrayArgument
-		: BaseArgument<T, O>;
+> = T extends "array" ? ArrayArgument : BaseArgument<T, O>;
 
 interface BaseArgument<T extends ArgumentType, O extends boolean> {
 	displayName?: string;
@@ -126,11 +122,9 @@ type InferArgDefinition<
 	A,
 	O extends boolean,
 	N extends ArgumentName<A> = ArgumentName<A>,
-> = N extends "object"
-	? ObjectArgument<InferArgsDefinition<A>, O>
-	: N extends "array"
-		? ArrayArgument<ArgumentName<A extends Array<infer K> ? K : never>, O>
-		: Argument<N, O>;
+> = N extends "array"
+	? ArrayArgument<ArgumentName<A extends Array<infer K> ? K : never>, O>
+	: Argument<N, O>;
 
 export type ActionResult<T = unknown> =
 	| VoidActionResult

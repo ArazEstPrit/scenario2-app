@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { call } from "#core/actions";
 import { getReport, setup } from "#core/modules";
 import { run } from "#core/ui/cli";

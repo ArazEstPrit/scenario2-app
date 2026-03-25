@@ -1,4 +1,3 @@
-import { registerCommand } from "#core/ui/cli";
 import {
 	ActionError,
 	InvalidArgumentError,
@@ -89,7 +88,7 @@ function parseArgs(
 	for (const arg of Object.keys(argDef)) {
 		const def = argDef[arg]!;
 		const fullArgName = parentArg ? `${parentArg}.${arg}` : arg;
-		if (!args[arg])
+		if (args[arg] === undefined || args[arg] === null)
 			if (!def.optional)
 				throw new RequiredArgumentMissingError(action, fullArgName);
 			else args[arg] = def.default;
@@ -104,13 +103,13 @@ function parseArgs(
 				);
 		}
 
-		if (def.type == "object")
-			args[arg] = parseArgs(
-				def.fields,
-				args[arg] as Record<string, unknown>,
-				action,
-				fullArgName,
-			);
+		// if (def.type == "object")
+		// 	args[arg] = parseArgs(
+		// 		def.fields,
+		// 		args[arg] as Record<string, unknown>,
+		// 		action,
+		// 		fullArgName,
+		// 	);
 	}
 	return args;
 }
@@ -132,4 +131,3 @@ register({
 			.join("\n");
 	},
 });
-registerCommand("actions:help");

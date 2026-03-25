@@ -1,18 +1,21 @@
 {
-  "name": "scenario2-app",
-  "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "module",
-  "main": "index.js",
-  "scripts": {
-    "start": "node src/main.ts"
-  },
-  "dependencies": {
-    "typescript": "^5.9.3"
-  },
-  "imports": {
-    "#*": "./src/*/index.ts"
-  }
+	"name": "scenario2-app",
+	"version": "1.0.0",
+	"description": "",
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"start": "node src/main.ts"
+	},
+	"dependencies": {
+		"typescript": "^5.9.3"
+	},
+	"imports": {
+		"#*": "./src/*/index.ts"
+	},
+	"bin": {
+		"modulus": "./src/main.ts"
+	}
 }

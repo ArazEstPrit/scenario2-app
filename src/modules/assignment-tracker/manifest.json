@@ -1,0 +1,6 @@
+{
+	"name": "assignment-tracker",
+	"displayName": "Assignment Tracker",
+	"description": "Track upcoming assignments",
+	"entry": "./main.ts"
+}
