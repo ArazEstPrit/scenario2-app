@@ -54,7 +54,7 @@ export function call<const N extends ActionName>(
 			actionName,
 		) as ActionMap[N]["arguments"];
 
-		result.data = action.execute(args);
+		result.data = action.execute(args) as ActionMap[N]["returns"]["data"];
 	} catch (error) {
 		result.success = false;
 		result.error = new ActionError(
