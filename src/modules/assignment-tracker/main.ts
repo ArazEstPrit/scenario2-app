@@ -79,12 +79,14 @@ export function init() {
 			effort: {
 				type: "number",
 				aliases: ["e"],
+				description: "from 1-6",
 				validate: val =>
 					(0 < val && val <= 6) || "number must be between 1-6",
 			},
 			importance: {
 				type: "number",
 				aliases: ["i"],
+				description: "from 1-6",
 				validate: val =>
 					(0 < val && val <= 6) || "number must be between 1-6",
 			},

@@ -192,7 +192,13 @@ export function init() {
 		returnType: "list",
 		execute() {
 			return getStore("habit-tracker/habits", []).data.filter(
-				h => h.recurrence[new Date().getDay()],
+				h =>
+					h.recurrence[new Date().getDay()] &&
+					!getStore("habit-tracker/history", []).data.find(
+						l =>
+							l.habitId == h.id &&
+							l.date.toDateString() == new Date().toDateString(),
+					),
 			);
 		},
 	});
