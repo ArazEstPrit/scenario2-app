@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { call } from "#core/actions";
 import { setup } from "#core/modules";
 import {
 	CommandError,
@@ -19,7 +20,8 @@ try {
 } catch (err) {
 	if (err instanceof CommandError) {
 		printCommandError(err);
-		if (err instanceof CommandNotFoundError) printHelp();
+		if (err instanceof CommandNotFoundError)
+			printHelp(call("actions:help", {}).data);
 	} else {
 		throw err;
 	}
