@@ -25,7 +25,9 @@
  */
 export interface ActionMap {
 	"actions:help": {
-		arguments: {};
+		arguments: {
+			action?: string;
+		};
 		returns: ListActionResult<{
 			name: string;
 			displayName?: string;

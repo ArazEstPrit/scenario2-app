@@ -5,9 +5,9 @@ import {
 	type ListActionResult,
 	type Argument,
 	type ArrayArgument,
+	type ActionMap,
 	callAsync,
 	getAction,
-	call,
 	RequiredArgumentMissingError,
 	InvalidArgumentError,
 } from "#core/actions";
@@ -19,7 +19,7 @@ import {
 	CommandNotFoundError,
 } from "./errors.ts";
 import { styleText } from "util";
-import { getReport } from "#core/modules";
+import { getManifests, getReport } from "#core/modules";
 
 const c = {
 	dim: (s: string) => styleText("dim", s),
@@ -73,11 +73,6 @@ export async function run(args: string[]) {
 	const action = getAction(commandName);
 	if (!action) throw new CommandNotFoundError(commandName);
 
-	if (action.name == "actions:help") {
-		printHelp();
-		return;
-	}
-
 	const resolvedParams = resolveParams(params, action.arguments);
 
 	let result;
@@ -104,7 +99,9 @@ export async function run(args: string[]) {
 		throw new CommandExecutionError(action.name, cause);
 	}
 
-	displayResult(result);
+	if (action.name == "actions:help")
+		printHelp(result.data as ActionMap["actions:help"]["returns"]["data"]);
+	else displayResult(result);
 }
 
 function parseArgs(args: string[]): RawParsedCommandArguments {
@@ -354,9 +351,9 @@ function colourCell(key: string, value: string): string {
 	return value;
 }
 
-export function printHelp() {
-	const { data: actions } = call("actions:help", {});
-
+export function printHelp(
+	actions: ActionMap["actions:help"]["returns"]["data"],
+) {
 	const groups = new Map<string, typeof actions>();
 	for (const action of actions) {
 		const ns = action.name.split(":")[0]!;
@@ -364,14 +361,26 @@ export function printHelp() {
 		groups.get(ns)!.push(action);
 	}
 
-	console.log();
-	console.log(c.bold(c.cyan(`${INDENT}┌───────────────────────────────┐`)));
-	console.log(c.bold(c.cyan(`${INDENT}│       Available Actions       │`)));
-	console.log(c.bold(c.cyan(`${INDENT}└───────────────────────────────┘`)));
+	if (actions.length != 1) {
+		console.log();
+		console.log(
+			c.bold(c.cyan(`${INDENT}┌───────────────────────────────┐`)),
+		);
+		console.log(
+			c.bold(c.cyan(`${INDENT}│       Available Actions       │`)),
+		);
+		console.log(
+			c.bold(c.cyan(`${INDENT}└───────────────────────────────┘`)),
+		);
+	}
 
 	for (const [ns, cmds] of groups) {
 		console.log();
-		console.log(c.bold(c.magenta(`${INDENT}${ns}`)));
+		const displayName = getManifests().find(m => m.name == ns)?.displayName;
+		console.log(
+			c.bold(c.magenta(`${INDENT}${ns}`)),
+			displayName ? `- ${c.bold(displayName)}` : "",
+		);
 		console.log(c.dim(`${INDENT}${"─".repeat(50)}`));
 
 		for (const action of cmds) {

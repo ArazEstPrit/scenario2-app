@@ -119,21 +119,32 @@ export function resolveAlias(alias: string): ActionName | undefined {
 
 register({
 	name: "actions:help",
-	displayName: "Show help screen",
-	aliases: ["h"],
-	arguments: {},
+	displayName: "Show help screen, or help for a given command.",
+	aliases: ["h", "help"],
+	arguments: {
+		action: {
+			type: "string",
+			description: "Show help for an action. Can be an alias",
+			aliases: ["a"],
+			optional: true,
+		},
+	},
 	returnType: "list",
-	execute() {
-		return actionMap
+	execute({ action }) {
+		const actions = actionMap
 			.values()
-			.map(({ execute, ...action }) => ({
-				...action,
-				arguments: Object.fromEntries(
-					Object.entries(action.arguments).map(
-						([key, { validate, ...arg }]) => [key, arg],
-					),
+			.filter(a =>
+				action ? a.name == action || a.aliases?.includes(action) : true,
+			)
+			.toArray();
+		if (actions.length == 0) throw "Action not found!";
+		return actions.map(({ execute, ...action }) => ({
+			...action,
+			arguments: Object.fromEntries(
+				Object.entries(action.arguments).map(
+					([key, { validate, ...arg }]) => [key, arg],
 				),
-			}))
-			.toArray() as never; // as never because typescript is dumb
+			),
+		})) as never; // as never because typescript is dumb
 	},
 });
