@@ -19,9 +19,9 @@ file in the following format:
 
 ```jsonc
 {
-    "name": "" // Must match the folder name exactly. Must not include spaces
-    "displayName": "" // User-friendly module name. Can include spaces
-    "description": "" // Optional
+    "name": "", // Must match the folder name exactly. Must not include spaces.
+    "displayName": "", // User-friendly module name. Can include spaces.
+    "description": "", // Optional.
     "entry": "" // Path to module entry point.
 }
 ```
