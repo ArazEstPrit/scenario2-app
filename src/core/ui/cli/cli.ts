@@ -99,6 +99,8 @@ export async function run(args: string[]) {
 		throw new CommandExecutionError(action.name, cause);
 	}
 
+	// It would probably be better to set up a new ActionResult type just for
+	// the help screen, that way, this logic would be moved to displayResult
 	if (action.name == "actions:help")
 		printHelp(result.data as ActionMap["actions:help"]["returns"]["data"]);
 	else displayResult(result);

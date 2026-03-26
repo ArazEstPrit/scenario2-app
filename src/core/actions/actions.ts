@@ -102,13 +102,9 @@ function parseArgs(
 				);
 		}
 
-		// if (def.type == "object")
-		// 	args[arg] = parseArgs(
-		// 		def.fields,
-		// 		args[arg] as Record<string, unknown>,
-		// 		action,
-		// 		fullArgName,
-		// 	);
+		// I initially though of adding object argument types, but that turned
+		// out to be too complicated to implement in the cli, so for now, we
+		// wont support it.
 	}
 	return args;
 }
