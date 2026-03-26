@@ -3,14 +3,14 @@ import {
 	type ListActionResult,
 	type VoidActionResult,
 	register,
+	call,
 } from "#core/actions";
+import { listen } from "#core/events";
 import { getStore, updateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
-		"assignment-tracker/assignments": {
-			assignments: Omit<Assignment, "score">[];
-		};
+		"assignment-tracker/assignments": Omit<Assignment, "score">[];
 	}
 }
 
@@ -21,8 +21,8 @@ declare module "#core/actions" {
 			returns: ItemActionResult<Assignment>;
 		};
 		"assignment-tracker:list": {
-			arguments: {};
-			returns: ListActionResult<Assignment[]>;
+			arguments: { completed?: boolean };
+			returns: ListActionResult<Assignment>;
 		};
 		"assignment-tracker:remove": {
 			arguments: Pick<Assignment, "id">;
@@ -49,12 +49,14 @@ interface Assignment {
 	importance: number;
 	score: number;
 	completed: boolean;
+	topicId?: number;
 }
 
 export function init() {
 	register({
 		name: "assignment-tracker:add",
 		displayName: "Add Assignment",
+		description: "Add a new assignment.",
 		aliases: ["at:add"],
 		arguments: {
 			name: {
@@ -76,19 +78,22 @@ export function init() {
 				validate: val =>
 					(0 < val && val <= 6) || "number must be between 1-6",
 			},
+			topicId: {
+				type: "number",
+				aliases: ["t"],
+				optional: true,
+			},
 		},
 		returnType: "item",
 		execute(params) {
-			const store = getStore("assignment-tracker/assignments", {
-				assignments: [],
-			});
-			const lastId = store.data.assignments.at(-1)?.id ?? -1;
+			const store = getStore("assignment-tracker/assignments", []);
+			const lastId = store.data.at(-1)?.id ?? -1;
 			const assignment: Assignment = addScore({
 				...params,
 				id: lastId + 1,
 				completed: false,
 			});
-			store.data.assignments.push(assignment);
+			store.data.push(assignment);
 			updateStore(store);
 			return assignment;
 		},
@@ -97,14 +102,25 @@ export function init() {
 	register({
 		name: "assignment-tracker:list",
 		displayName: "List Assignments",
+		description:
+			"List your assignment sorted by priority score, optionally show completed ones.",
 		aliases: ["at:list"],
-		arguments: {},
+		arguments: {
+			completed: {
+				type: "boolean",
+				aliases: ["c"],
+				displayName: "Show completed",
+				optional: true,
+				default: false,
+			},
+		},
 		returnType: "list",
-		execute() {
-			const store = getStore("assignment-tracker/assignments", {
-				assignments: [],
-			});
-			return store.data.assignments.map(addScore);
+		execute({ completed }) {
+			const store = getStore("assignment-tracker/assignments", []);
+			return store.data
+				.filter(a => !a.completed || completed)
+				.map(addScore)
+				.sort((a, b) => b.score - a.score);
 		},
 	});
 
@@ -115,13 +131,11 @@ export function init() {
 		arguments: { id: { type: "number" } },
 		returnType: "void",
 		execute({ id }) {
-			const store = getStore("assignment-tracker/assignments", {
-				assignments: [],
-			});
-			const filtered = store.data.assignments.filter(a => a.id != id);
-			if (filtered.length == store.data.assignments.length)
+			const store = getStore("assignment-tracker/assignments", []);
+			const filtered = store.data.filter(a => a.id != id);
+			if (filtered.length == store.data.length)
 				throw "Assignment not found";
-			store.data.assignments = filtered;
+			store.data = filtered;
 			updateStore(store);
 		},
 	});
@@ -133,10 +147,8 @@ export function init() {
 		arguments: { id: { type: "number" } },
 		returnType: "void",
 		execute({ id }) {
-			const store = getStore("assignment-tracker/assignments", {
-				assignments: [],
-			});
-			const assignment = store.data.assignments.find(a => a.id == id);
+			const store = getStore("assignment-tracker/assignments", []);
+			const assignment = store.data.find(a => a.id == id);
 			if (!assignment) throw "Assignment not found";
 			assignment.completed = true;
 			updateStore(store);
@@ -178,15 +190,16 @@ export function init() {
 				aliases: ["c"],
 				optional: true,
 			},
+			topicId: {
+				type: "number",
+				aliases: ["t"],
+				optional: true,
+			},
 		},
 		returnType: "item",
 		execute(params) {
-			const store = getStore("assignment-tracker/assignments", {
-				assignments: [],
-			});
-			const assignment = store.data.assignments.find(
-				a => a.id == params.id,
-			);
+			const store = getStore("assignment-tracker/assignments", []);
+			const assignment = store.data.find(a => a.id == params.id);
 			if (!assignment) throw "Assignment not found";
 
 			if (params.name) assignment.name = params.name;
@@ -196,10 +209,22 @@ export function init() {
 			if (params.effort) assignment.effort = params.effort;
 			if (params.importance) assignment.importance = params.importance;
 
-			store.data.assignments.push(assignment);
 			updateStore(store);
 			return addScore(assignment);
 		},
+	});
+
+	listen("study-tracker:loaded", () => {
+		const store = getStore("assignment-tracker/assignments", []);
+
+		store.data.forEach(a => {
+			if (a.topicId !== undefined) {
+				call("study-tracker:boost-topic", {
+					topicId: a.topicId,
+					amount: addScore(a).score,
+				});
+			}
+		});
 	});
 }
 

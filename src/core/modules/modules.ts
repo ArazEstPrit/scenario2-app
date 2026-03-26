@@ -163,10 +163,6 @@ function validate(
 			entry,
 			"Entrypoint must be TypeScript or JavaScript",
 		);
-	// This is the only synchronous FS operation. The async alternatives
-	// like `access()` are more complicated to use, especially inline like
-	// this. Once the OS abstraction is done, the module system's FS
-	// operations will be replaced anyway, so for now, this will do.
 	else if (entry && !existsSync(join(absoluteModulePath, dirName, entry)))
 		error = new ManifestEntryNotFoundError(dirName, entry);
 

@@ -26,7 +26,7 @@ export function getAction(name: ActionName | string): Action | undefined {
 export function register<const N extends ActionName>(
 	action: Action<N, InferArgsDefinition<ActionMap[N]["arguments"]>>,
 ) {
-	actionMap.set(action.name, action);
+	actionMap.set(action.name, action as never);
 
 	if (action.displayName) aliasMap.set(action.displayName, action.name);
 	action.aliases?.forEach(a => aliasMap.set(a, action.name));
@@ -40,7 +40,7 @@ export function call<const N extends ActionName>(
 		N,
 		InferArgsDefinition<ActionMap[N]["arguments"]>
 	>;
-	// TODO: check if action exists
+	if (!action) throw new ActionError("Action not found", actionName);
 
 	const result = {
 		type: action.returnType,
@@ -119,14 +119,21 @@ export function resolveAlias(alias: string): ActionName | undefined {
 
 register({
 	name: "actions:help",
+	displayName: "Show help screen",
 	aliases: ["h"],
 	arguments: {},
-	returnType: "item",
+	returnType: "list",
 	execute() {
 		return actionMap
 			.values()
-			.map(a => `${a.name} - ${a.aliases?.join("|")}`)
-			.toArray()
-			.join("\n");
+			.map(({ execute, ...action }) => ({
+				...action,
+				arguments: Object.fromEntries(
+					Object.entries(action.arguments).map(
+						([key, { validate, ...arg }]) => [key, arg],
+					),
+				),
+			}))
+			.toArray() as never; // as never because typescript is dumb
 	},
 });

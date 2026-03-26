@@ -20,15 +20,20 @@
  * }
  * ```
  *
- * Event names should have the following format: `"module-name:action-name"`.
+ * Action names should have the following format: `"module-name:action-name"`.
  * Nested namespaces are also supported: `"module-name:ns1:ns2:action-name"`
  */
 export interface ActionMap {
 	"actions:help": {
 		arguments: {};
-		// TODO: it would be better to have a more structured result, which
-		// gets serialized as a string by the caller.
-		returns: ItemActionResult<string>;
+		returns: ListActionResult<{
+			name: string;
+			displayName?: string;
+			aliases?: string[];
+			description?: string;
+			arguments: Omit<Argument, "validate">[];
+			returnType: ActionResult["type"];
+		}>;
 	};
 }
 
@@ -59,7 +64,7 @@ interface BaseAction<
 		: inferResultData<U>;
 }
 
-type inferResultData<T> = T extends ActionResult<infer T> ? T : never;
+type inferResultData<R> = R extends ActionResult ? R["data"] : void;
 
 export interface ArgumentTypeMap {
 	string: string;
@@ -93,7 +98,7 @@ interface BaseArgument<T extends ArgumentType, O extends boolean> {
 	validate?: (value: ArgumentTypeMap[T]) => boolean | string;
 }
 
-interface ArrayArgument<
+export interface ArrayArgument<
 	A extends ArgumentType = ArgumentType,
 	O extends boolean = boolean,
 > extends BaseArgument<"array", O> {

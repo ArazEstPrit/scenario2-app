@@ -1,0 +1,6 @@
+{
+	"name": "habit-tracker",
+	"displayName": "Habit Tracker",
+	"description": "Track Habits",
+	"entry": "./main.ts"
+}

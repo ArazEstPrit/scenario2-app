@@ -1,0 +1,6 @@
+{
+	"name": "study-tracker",
+	"displayName": "Study Tracker",
+	"description": "Track your study sessions",
+	"entry": "./main.ts"
+}
