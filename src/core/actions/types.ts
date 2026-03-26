@@ -28,14 +28,7 @@ export interface ActionMap {
 		arguments: {
 			action?: string;
 		};
-		returns: ListActionResult<{
-			name: string;
-			displayName?: string;
-			aliases?: string[];
-			description?: string;
-			arguments: Omit<Argument, "validate">[];
-			returnType: ActionResult["type"];
-		}>;
+		returns: HelpActionResult;
 	};
 }
 
@@ -136,7 +129,8 @@ type InferArgDefinition<
 export type ActionResult<T = unknown> =
 	| VoidActionResult
 	| ItemActionResult<T>
-	| ListActionResult<T>;
+	| ListActionResult<T>
+	| HelpActionResult;
 
 export type AwaitedActionResult<T extends ActionResult> =
 	T extends ActionResult<infer T> ? ActionResult<Awaited<T>> : never;
@@ -161,4 +155,16 @@ export interface ItemActionResult<T> extends BaseActionResult {
 export interface ListActionResult<T> extends BaseActionResult {
 	type: "list";
 	data: T[];
+}
+
+export interface HelpActionResult extends BaseActionResult {
+	type: "help";
+	data: {
+		name: string;
+		displayName?: string;
+		aliases?: string[];
+		description?: string;
+		arguments: Omit<Argument, "validate">[];
+		returnType: ActionResult["type"];
+	}[];
 }

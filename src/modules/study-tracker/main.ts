@@ -5,7 +5,7 @@ import {
 	register,
 } from "#core/actions";
 import { emit } from "#core/events";
-import { getStore, updateStore } from "#core/storage";
+import { getStore, sortAndUpdateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
@@ -208,7 +208,7 @@ export async function init() {
 				boost: 0,
 			};
 			store.data.push(topic);
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return topic;
 		},
 	});
@@ -258,7 +258,7 @@ export async function init() {
 			const before = store.data.length;
 			store.data = store.data.filter(t => !toRemove.has(t.id));
 			if (store.data.length === before) throw "Topic not found";
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -297,7 +297,7 @@ export async function init() {
 			if (params.difficulty !== undefined)
 				topic.difficulty = params.difficulty;
 
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return topic;
 		},
 	});
@@ -320,7 +320,7 @@ export async function init() {
 			const topic = store.data.find(t => t.id === topicId);
 			if (!topic) throw `Topic ${topicId} not found`;
 			topic.boost = amount;
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -373,7 +373,7 @@ export async function init() {
 				}),
 			};
 			store.data.push(session);
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return session;
 		},
 	});
@@ -418,7 +418,7 @@ export async function init() {
 			if (filtered.length === store.data.length)
 				throw "Session not found";
 			store.data = filtered;
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -445,7 +445,7 @@ export async function init() {
 			topicStore.data.forEach(t => {
 				t.boost *= 0.5;
 			});
-			updateStore(topicStore);
+			sortAndUpdateStore(topicStore);
 
 			const history = getStore("study-tracker/history", []);
 			const entry: PastSession = {
@@ -456,7 +456,7 @@ export async function init() {
 				...(params.note && { note: params.note }),
 			};
 			history.data.push(entry);
-			updateStore(history);
+			sortAndUpdateStore(history);
 			return entry;
 		},
 	});

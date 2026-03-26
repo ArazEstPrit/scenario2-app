@@ -28,3 +28,8 @@ export function updateStore<N extends StoreName>(store: Store<N>): Store<N> {
 	writeFileSync(path, JSON.stringify(store.data));
 	return getStore(store.name);
 }
+
+export function sortAndUpdateStore<S extends StoreName>(store: Store<S>) {
+	store.data.sort((a, b) => a.id - b.id);
+	updateStore(store);
+}

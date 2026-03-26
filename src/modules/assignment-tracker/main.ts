@@ -6,7 +6,7 @@ import {
 	call,
 } from "#core/actions";
 import { listen } from "#core/events";
-import { getStore, updateStore } from "#core/storage";
+import { getStore, sortAndUpdateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
@@ -94,7 +94,7 @@ export function init() {
 				completed: false,
 			});
 			store.data.push(assignment);
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return assignment;
 		},
 	});
@@ -137,7 +137,7 @@ export function init() {
 			if (filtered.length == store.data.length)
 				throw "Assignment not found";
 			store.data = filtered;
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -153,7 +153,7 @@ export function init() {
 			const assignment = store.data.find(a => a.id == id);
 			if (!assignment) throw "Assignment not found";
 			assignment.completed = true;
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -206,13 +206,14 @@ export function init() {
 			if (!assignment) throw "Assignment not found";
 
 			if (params.name) assignment.name = params.name;
-			if (params.completed) assignment.completed = params.completed;
+			if (params.completed !== undefined)
+				assignment.completed = params.completed;
 			if (params.description) assignment.description = params.description;
 			if (params.dueDate) assignment.dueDate = params.dueDate;
 			if (params.effort) assignment.effort = params.effort;
 			if (params.importance) assignment.importance = params.importance;
 
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return addScore(assignment);
 		},
 	});

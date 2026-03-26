@@ -4,7 +4,7 @@ import {
 	type VoidActionResult,
 	register,
 } from "#core/actions";
-import { getStore, updateStore } from "#core/storage";
+import { getStore, sortAndUpdateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
@@ -93,7 +93,7 @@ export function init() {
 			const lastId = store.data.at(-1)?.id ?? -1;
 			const habit = { ...params, id: lastId + 1 };
 			store.data.push(habit);
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return habit;
 		},
 	});
@@ -123,7 +123,7 @@ export function init() {
 			const filtered = store.data.filter(a => a.id != id);
 			if (filtered.length == store.data.length) throw "Habit not found";
 			store.data = filtered;
-			updateStore(store);
+			sortAndUpdateStore(store);
 		},
 	});
 
@@ -169,8 +169,7 @@ export function init() {
 			if (params.recurrence) habit.recurrence = params.recurrence;
 			if (params.time) habit.time = params.time;
 
-			store.data.push(habit);
-			updateStore(store);
+			sortAndUpdateStore(store);
 			return habit;
 		},
 	});
@@ -216,7 +215,7 @@ export function init() {
 
 			if (note) log.note = note;
 			history.data.push(log);
-			updateStore(history);
+			sortAndUpdateStore(history);
 			return log;
 		},
 	});

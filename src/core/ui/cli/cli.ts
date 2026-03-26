@@ -5,7 +5,7 @@ import {
 	type ListActionResult,
 	type Argument,
 	type ArrayArgument,
-	type ActionMap,
+	type HelpActionResult,
 	callAsync,
 	getAction,
 	RequiredArgumentMissingError,
@@ -99,11 +99,7 @@ export async function run(args: string[]) {
 		throw new CommandExecutionError(action.name, cause);
 	}
 
-	// It would probably be better to set up a new ActionResult type just for
-	// the help screen, that way, this logic would be moved to displayResult
-	if (action.name == "actions:help")
-		printHelp(result.data as ActionMap["actions:help"]["returns"]["data"]);
-	else displayResult(result);
+	displayResult(result);
 }
 
 function parseArgs(args: string[]): RawParsedCommandArguments {
@@ -255,6 +251,9 @@ function displayResult(result: ActionResult) {
 		case "list":
 			displayList(result);
 			break;
+		case "help":
+			displayHelp(result);
+			break;
 	}
 }
 
@@ -353,9 +352,8 @@ function colourCell(key: string, value: string): string {
 	return value;
 }
 
-export function printHelp(
-	actions: ActionMap["actions:help"]["returns"]["data"],
-) {
+export function displayHelp(result: HelpActionResult) {
+	const actions = result.data;
 	const groups = new Map<string, typeof actions>();
 	for (const action of actions) {
 		const ns = action.name.split(":")[0]!;

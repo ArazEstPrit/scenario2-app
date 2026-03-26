@@ -6,7 +6,7 @@ import {
 	CommandError,
 	CommandNotFoundError,
 	printCommandError,
-	printHelp,
+	displayHelp,
 	printSetupErrors,
 	run,
 } from "#core/ui/cli";
@@ -21,7 +21,7 @@ try {
 	if (err instanceof CommandError) {
 		printCommandError(err);
 		if (err instanceof CommandNotFoundError)
-			printHelp(call("actions:help", {}).data);
+			displayHelp(call("actions:help", {}));
 	} else {
 		throw err;
 	}

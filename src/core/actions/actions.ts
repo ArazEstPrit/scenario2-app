@@ -125,7 +125,7 @@ register({
 			optional: true,
 		},
 	},
-	returnType: "list",
+	returnType: "help",
 	execute({ action }) {
 		const actions = actionMap
 			.values()
