@@ -71,7 +71,11 @@ export function init() {
 				validate: name => !!name.trim(),
 			},
 			description: { type: "string", aliases: ["D"], optional: true },
-			dueDate: { type: "date", aliases: ["d"] },
+			dueDate: {
+				type: "date",
+				aliases: ["d"],
+				description: "format: YYYY-MM-DD",
+			},
 			effort: {
 				type: "number",
 				aliases: ["e"],
@@ -180,7 +184,12 @@ export function init() {
 				validate: name => !!name.trim(),
 			},
 			description: { type: "string", aliases: ["D"], optional: true },
-			dueDate: { type: "date", aliases: ["d"], optional: true },
+			dueDate: {
+				type: "date",
+				aliases: ["d"],
+				optional: true,
+				description: "format: YYYY-MM-DD",
+			},
 			effort: {
 				type: "number",
 				aliases: ["e"],
