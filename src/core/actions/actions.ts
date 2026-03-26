@@ -115,12 +115,12 @@ export function resolveAlias(alias: string): ActionName | undefined {
 
 register({
 	name: "actions:help",
-	displayName: "Show help screen, or help for a given command.",
+	displayName: "Show help screen, or help for a given action.",
 	aliases: ["h", "help"],
 	arguments: {
 		action: {
 			type: "string",
-			description: "Show help for an action. Can be an alias",
+			description: "Show help for an action. Can be an alias.",
 			aliases: ["a"],
 			optional: true,
 		},

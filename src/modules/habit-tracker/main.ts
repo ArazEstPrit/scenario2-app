@@ -25,7 +25,7 @@ declare module "#core/actions" {
 		};
 		"habit-tracker:list": {
 			arguments: {};
-			returns: ListActionResult<Habit[]>;
+			returns: ListActionResult<Habit>;
 		};
 		"habit-tracker:remove": {
 			arguments: Pick<Habit, "id">;
@@ -33,7 +33,7 @@ declare module "#core/actions" {
 		};
 		"habit-tracker:status": {
 			arguments: {};
-			returns: ListActionResult<Habit[]>;
+			returns: ListActionResult<Habit>;
 		};
 		"habit-tracker:log": {
 			arguments: Pick<HabitInstance, "habitId" | "note">;
@@ -41,7 +41,7 @@ declare module "#core/actions" {
 		};
 		"habit-tracker:history": {
 			arguments: {};
-			returns: ListActionResult<HabitInstance[]>;
+			returns: ListActionResult<HabitInstance>;
 		};
 	}
 }
@@ -65,6 +65,7 @@ export function init() {
 	register({
 		name: "habit-tracker:add",
 		displayName: "Add Habit",
+		description: "Add a habit.",
 		aliases: ["ht:add"],
 		arguments: {
 			name: {
@@ -100,6 +101,7 @@ export function init() {
 	register({
 		name: "habit-tracker:list",
 		displayName: "List Habits",
+		description: "List all habits.",
 		aliases: ["ht:list"],
 		arguments: {},
 		returnType: "list",
@@ -112,6 +114,7 @@ export function init() {
 	register({
 		name: "habit-tracker:remove",
 		displayName: "Remove Habit",
+		description: "Remove a habit.",
 		aliases: ["ht:remove"],
 		arguments: { id: { type: "number" } },
 		returnType: "void",
@@ -127,6 +130,7 @@ export function init() {
 	register({
 		name: "habit-tracker:edit",
 		displayName: "Edit Habit",
+		description: "Edit a habit.",
 		aliases: ["ht:edit"],
 		arguments: {
 			id: {
@@ -173,7 +177,8 @@ export function init() {
 
 	register({
 		name: "habit-tracker:status",
-		displayName: "Show today's habits",
+		displayName: "Show Status",
+		description: "Show today's habits.",
 		aliases: ["ht:status"],
 		arguments: {},
 		returnType: "list",
@@ -186,7 +191,8 @@ export function init() {
 
 	register({
 		name: "habit-tracker:log",
-		displayName: "Log a habit for today",
+		displayName: "Log Habit instance",
+		description: "Log a habit for today.",
 		aliases: ["ht:log"],
 		arguments: {
 			habitId: { type: "number" },
@@ -218,6 +224,7 @@ export function init() {
 	register({
 		name: "habit-tracker:history",
 		displayName: "See log history",
+		description: "See log history.",
 		aliases: ["ht:history"],
 		arguments: {},
 		returnType: "list",

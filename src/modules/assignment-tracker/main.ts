@@ -127,6 +127,7 @@ export function init() {
 	register({
 		name: "assignment-tracker:remove",
 		displayName: "Remove Assignment",
+		description: "Permanently remove an assignment.",
 		aliases: ["at:remove"],
 		arguments: { id: { type: "number" } },
 		returnType: "void",
@@ -143,6 +144,7 @@ export function init() {
 	register({
 		name: "assignment-tracker:complete",
 		displayName: "Complete Assignment",
+		description: "Complete an assignment. The assignment is not deleted.",
 		aliases: ["at:complete"],
 		arguments: { id: { type: "number" } },
 		returnType: "void",
@@ -158,6 +160,7 @@ export function init() {
 	register({
 		name: "assignment-tracker:edit",
 		displayName: "Edit Assignment",
+		description: "Edit an assignment.",
 		aliases: ["at:edit"],
 		arguments: {
 			id: {

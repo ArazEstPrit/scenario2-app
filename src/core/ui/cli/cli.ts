@@ -411,9 +411,11 @@ export function printHelp(
 					: "";
 				const dflt =
 					def.default !== undefined ? c.dim(` = ${def.default}`) : "";
+				const description = def.description && c.dim(def.description);
 				console.log(
 					`${INDENT}    ${req} ${c.white("--" + key)}${alias} ${c.dim("<")}${type}${c.dim(">")}${dflt}`,
 				);
+				if (description) console.log(`${INDENT}      ${description}`);
 			}
 			console.log();
 		}
