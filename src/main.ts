@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { call } from "#core/actions";
+import { listen } from "#core/events";
 import { setup } from "#core/modules";
 import {
 	CommandError,
@@ -9,7 +10,12 @@ import {
 	displayHelp,
 	printSetupErrors,
 	run,
+	printEventBusError,
 } from "#core/ui/cli";
+
+listen("event-bus:listener-error", e => {
+	printEventBusError(e.payload);
+});
 
 await setup();
 

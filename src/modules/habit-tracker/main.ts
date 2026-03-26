@@ -4,12 +4,20 @@ import {
 	type VoidActionResult,
 	register,
 } from "#core/actions";
+import { emitSync } from "#core/events";
 import { getStore, sortAndUpdateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
 		"habit-tracker/habits": Habit[];
 		"habit-tracker/history": HabitInstance[];
+	}
+}
+
+declare module "#core/events" {
+	interface EventMap {
+		"habit-tracker:new-habit": Habit;
+		"habit-tracker:new-habit-log": HabitInstance;
 	}
 }
 
@@ -94,6 +102,7 @@ export function init() {
 			const habit = { ...params, id: lastId + 1 };
 			store.data.push(habit);
 			sortAndUpdateStore(store);
+			emitSync("habit-tracker:new-habit", habit);
 			return habit;
 		},
 	});
@@ -216,6 +225,7 @@ export function init() {
 			if (note) log.note = note;
 			history.data.push(log);
 			sortAndUpdateStore(history);
+			emitSync("habit-tracker:new-habit-log", log);
 			return log;
 		},
 	});

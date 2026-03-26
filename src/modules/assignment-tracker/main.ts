@@ -5,12 +5,18 @@ import {
 	register,
 	call,
 } from "#core/actions";
-import { listen } from "#core/events";
+import { emitSync, listen } from "#core/events";
 import { getStore, sortAndUpdateStore } from "#core/storage";
 
 declare module "#core/storage" {
 	interface StoreMap {
 		"assignment-tracker/assignments": Omit<Assignment, "score">[];
+	}
+}
+
+declare module "#core/events" {
+	interface EventMap {
+		"assignment-tracker:new-assignment": Assignment;
 	}
 }
 
@@ -95,6 +101,7 @@ export function init() {
 			});
 			store.data.push(assignment);
 			sortAndUpdateStore(store);
+			emitSync("assignment-tracker:new-assignment", assignment);
 			return assignment;
 		},
 	});

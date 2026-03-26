@@ -20,6 +20,7 @@ import {
 } from "./errors.ts";
 import { styleText } from "util";
 import { getManifests, getReport } from "#core/modules";
+import { EventBusError } from "#core/events";
 
 const c = {
 	dim: (s: string) => styleText("dim", s),
@@ -196,7 +197,7 @@ export function printSetupErrors(): void {
 
 	for (const mod of failed) {
 		console.error(
-			`\n${INDENT}${c.bold(c.white(mod.name))}  ${c.dim("failed at")} ${c.yellow(mod.stage)}`,
+			`\n${INDENT}${c.bold(mod.name)}  ${c.dim("failed at")} ${c.yellow(mod.stage)}`,
 		);
 		printCauseChain(mod.error);
 	}
@@ -207,6 +208,15 @@ export function printSetupErrors(): void {
 			`${INDENT}${report.initialized}/${report.discovered} modules loaded  ·  setup took ${report.setupTime}ms`,
 		),
 	);
+	console.error();
+}
+
+export function printEventBusError(err: EventBusError) {
+	console.error();
+
+	console.error(`${INDENT}${c.red("+")}  ${err.message}`);
+	printCauseChain(err.cause);
+
 	console.error();
 }
 
@@ -346,7 +356,7 @@ function colourCell(key: string, value: string): string {
 		if (!isNaN(n))
 			return n >= 5 ? c.red(value) : n >= 3 ? c.yellow(value) : value;
 	}
-	if (key === "name") return c.white(value);
+	if (key === "name") return value;
 	if (key === "id") return c.dim(value);
 	if (key.toLowerCase().includes("date")) return c.cyan(value);
 	return value;
@@ -388,7 +398,7 @@ export function displayHelp(result: HelpActionResult) {
 				? c.dim(` [${action.aliases.join(", ")}]`)
 				: "";
 			const displayName = action.displayName
-				? c.dim(" — ") + c.white(action.displayName)
+				? c.dim(" — ") + action.displayName
 				: "";
 			console.log(
 				`${INDENT}  ${c.cyan(action.name)}${displayName}${aliases}`,
@@ -411,7 +421,7 @@ export function displayHelp(result: HelpActionResult) {
 					def.default !== undefined ? c.dim(` = ${def.default}`) : "";
 				const description = def.description && c.dim(def.description);
 				console.log(
-					`${INDENT}    ${req} ${c.white("--" + key)}${alias} ${c.dim("<")}${type}${c.dim(">")}${dflt}`,
+					`${INDENT}    ${req} ${"--" + key}${alias} ${c.dim("<")}${type}${c.dim(">")}${dflt}`,
 				);
 				if (description) console.log(`${INDENT}      ${description}`);
 			}
