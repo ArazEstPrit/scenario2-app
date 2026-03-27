@@ -60,6 +60,10 @@ declare module "#core/actions" {
 				}
 			>;
 		};
+		"study-tracker:edit-session": {
+			arguments: Pick<Session, "id"> & Partial<Omit<Session, "id">>;
+			returns: ItemActionResult<Session>;
+		};
 		"study-tracker:remove-session": {
 			arguments: Pick<Session, "id">;
 			returns: VoidActionResult;
@@ -328,12 +332,12 @@ export async function init() {
 		name: "study-tracker:add-session",
 		displayName: "Add Study Session Slot",
 		aliases: ["st:add-session"],
-		description:
-			'Add a recurring weekly study slot. type: "static" | "dynamic".',
+		description: "Add a recurring weekly study slot.",
 		arguments: {
 			type: {
 				type: "string",
 				aliases: ["t"],
+				description: '"static" | "dynamic"',
 				validate: v =>
 					["static", "dynamic"].includes(v) ||
 					'must be "static" or "dynamic"',
@@ -402,6 +406,64 @@ export async function init() {
 								"" + topicId)
 							: "-",
 				}));
+		},
+	});
+
+	register({
+		name: "study-tracker:edit-session",
+		displayName: "Edit Study Session Slot",
+		aliases: ["st:edit-session"],
+		description: "Edit a recurring weekly study slot.",
+		arguments: {
+			id: {
+				type: "number",
+			},
+			type: {
+				type: "string",
+				aliases: ["t"],
+				optional: true,
+				validate: v =>
+					["static", "dynamic"].includes(v) ||
+					'must be "static" or "dynamic"',
+			},
+			day: {
+				type: "number",
+				aliases: ["d"],
+				optional: true,
+				validate: v =>
+					(v >= 0 && v <= 6) || "day must be 0 (Sun) – 6 (Sat)",
+			},
+			timeStart: {
+				type: "string",
+				aliases: ["s"],
+				optional: true,
+				validate: v => /^\d{2}:\d{2}$/.test(v) || 'must be "HH:MM"',
+			},
+			timeEnd: {
+				type: "string",
+				aliases: ["e"],
+				optional: true,
+				validate: v => /^\d{2}:\d{2}$/.test(v) || 'must be "HH:MM"',
+			},
+			topicId: { type: "number", aliases: ["T"], optional: true },
+		},
+		returnType: "item",
+		execute(params) {
+			if (params.type === "static" && params.topicId === undefined)
+				throw "Static sessions require --topicId";
+
+			const store = getStore("study-tracker/sessions", []);
+			const session = store.data.find(s => s.id === params.id);
+			if (!session) throw "Session not found";
+
+			if (params.type) session.type = params.type as "static" | "dynamic";
+			if (params.day) session.day = params.day;
+			if (params.timeStart) session.timeStart = params.timeStart;
+			if (params.timeEnd) session.timeEnd = params.timeEnd;
+			if (params.topicId) session.topicId = params.topicId;
+
+			sortAndUpdateStore(store);
+			return session;
 		},
 	});
 
